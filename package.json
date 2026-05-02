@@ -1,0 +1,50 @@
+{
+  "name": "local-jsx-asset-designer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local WebUI tool for designing JSX UI assets and exporting transparent PNG files.",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "electron:dev": "cross-env VITE_DEV_SERVER_URL=http://127.0.0.1:5173 node scripts/run-electron.cjs .",
+    "start": "concurrently -k \"npm run dev\" \"wait-on http://127.0.0.1:5173 && npm run electron:dev\"",
+    "build": "vite build",
+    "electron:start": "node scripts/run-electron.cjs .",
+    "package": "npm run build && electron-builder",
+    "typecheck": "tsc --noEmit",
+    "qa:smoke": "cross-env QA_SMOKE=1 node scripts/run-electron.cjs ."
+  },
+  "dependencies": {
+    "@babel/standalone": "^7.24.7",
+    "@vitejs/plugin-react": "^4.3.1",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "electron": "^31.2.1",
+    "electron-builder": "^24.13.3",
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "vite": "^5.3.4",
+    "wait-on": "^7.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.5.3"
+  },
+  "build": {
+    "appId": "local.jsx.asset.designer",
+    "productName": "Local JSX Asset Designer",
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "build"
+    },
+    "win": {
+      "target": "nsis"
+    }
+  }
+}
