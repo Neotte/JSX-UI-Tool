@@ -130,30 +130,6 @@ export default Component;
 
 앱 시작 시 `saves`와 `exports` 폴더가 없으면 자동 생성됩니다.
 
-## GitHub 업로드 체크리스트
-
-Git으로 push한다면 `.gitignore`가 아래 항목을 제외하므로 그대로 진행해도 됩니다.
-
-- `node_modules/`
-- `.tools/`
-- `dist/`
-- `release/`
-- `*.log`
-- `saves/*`, 단 `saves/.gitkeep`은 유지
-- `exports/*`, 단 `exports/.gitkeep`은 유지
-
-폴더를 압축하거나 GitHub 웹 UI에 드래그해서 올린다면 위 항목은 직접 삭제한 뒤 올리는 편이 좋습니다. 특히 `node_modules/`와 `.tools/`는 용량이 크고 OS별 바이너리를 포함합니다.
-
-현재 QA로 생성될 수 있는 예시 파일도 공개 저장소에는 필요 없습니다.
-
-- `saves/qa-loadout.json`
-- `exports/qa-export.png`
-- `exports/qa-export-crop.png`
-- `exports/sample-export.png`
-- `.vite-dev.log`
-
-소스 저장소에 남겨야 하는 대표 파일은 `src/`, `electron/`, `scripts/`, `docs/`, `package.json`, `package-lock.json`, `index.html`, `export.html`, `vite.config.ts`, `tsconfig.json`, `run-dev.bat`, `run-app.bat`, `.gitignore`, `README.md`, 그리고 `saves/.gitkeep`, `exports/.gitkeep`입니다.
-
 ## 보안 주의
 
 이 도구는 로컬 작업용 JSX 렌더링 도구입니다. 신뢰할 수 없는 JSX 코드를 실행하지 마십시오. renderer는 파일 시스템에 직접 접근하지 않고, Electron preload가 공개한 allowlist IPC만 사용합니다.
