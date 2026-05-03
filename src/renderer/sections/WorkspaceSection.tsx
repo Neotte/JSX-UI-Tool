@@ -1,4 +1,5 @@
-import { Download } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronDown, ChevronUp, Download, Search, X } from "lucide-react";
 import { validateResolution } from "../../shared/validation";
 import type { ExportMode } from "../../shared/types";
 import { ExportModal } from "../components/ExportModal";
@@ -44,6 +45,126 @@ export function WorkspaceSection({
   onConfirmExport
 }: Props) {
   const resolutionError = validateResolution(width, height);
+  const editorRef = useRef<HTMLTextAreaElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [isSearchOpen, setSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeMatchIndex, setActiveMatchIndex] = useState(-1);
+  const matches = useMemo(() => {
+    const term = searchTerm.trim();
+    if (!term) {
+      return [];
+    }
+
+    const source = jsxCode.toLocaleLowerCase();
+    const query = term.toLocaleLowerCase();
+    const nextMatches: number[] = [];
+    let index = source.indexOf(query);
+
+    while (index !== -1) {
+      nextMatches.push(index);
+      index = source.indexOf(query, index + query.length);
+    }
+
+    return nextMatches;
+  }, [jsxCode, searchTerm]);
+
+  useEffect(() => {
+    if (!searchTerm.trim() || matches.length === 0) {
+      setActiveMatchIndex(-1);
+      return;
+    }
+
+    setActiveMatchIndex((current) => {
+      if (current >= 0 && current < matches.length) {
+        return current;
+      }
+      return 0;
+    });
+  }, [matches.length, searchTerm]);
+
+  useEffect(() => {
+    if (activeMatchIndex < 0 || activeMatchIndex >= matches.length) {
+      return;
+    }
+
+    jumpToMatch(matches[activeMatchIndex]);
+  }, [activeMatchIndex, matches, searchTerm]);
+
+  useEffect(() => {
+    function handleShortcut(event: KeyboardEvent) {
+      if (isExportOpen || !(event.ctrlKey || event.metaKey) || event.key.toLocaleLowerCase() !== "f") {
+        return;
+      }
+
+      event.preventDefault();
+      openSearch();
+    }
+
+    window.addEventListener("keydown", handleShortcut);
+    return () => window.removeEventListener("keydown", handleShortcut);
+  }, [activeMatchIndex, isExportOpen, jsxCode, matches, searchTerm]);
+
+  function openSearch() {
+    const editor = editorRef.current;
+    if (editor && editor.selectionStart !== editor.selectionEnd) {
+      const selectedText = editor.value.slice(editor.selectionStart, editor.selectionEnd);
+      if (selectedText && !selectedText.includes("\n")) {
+        setSearchTerm(selectedText);
+      }
+    }
+
+    setSearchOpen(true);
+    window.setTimeout(() => {
+      searchInputRef.current?.select();
+      if (matches.length > 0 && activeMatchIndex >= 0) {
+        jumpToMatch(matches[activeMatchIndex]);
+      }
+    }, 0);
+  }
+
+  function closeSearch() {
+    setSearchOpen(false);
+    editorRef.current?.focus();
+  }
+
+  function jumpToMatch(index: number) {
+    const editor = editorRef.current;
+    const term = searchTerm.trim();
+    if (!editor || !term) {
+      return;
+    }
+
+    const lineIndex = jsxCode.slice(0, index).split("\n").length - 1;
+    const lineHeight = Number.parseFloat(window.getComputedStyle(editor).lineHeight) || 20;
+    editor.scrollTop = Math.max(0, lineIndex * lineHeight - editor.clientHeight * 0.35);
+    editor.setSelectionRange(index, index + term.length);
+  }
+
+  function moveMatch(direction: 1 | -1) {
+    if (matches.length === 0) {
+      return;
+    }
+
+    setActiveMatchIndex((current) => {
+      if (current < 0) {
+        return 0;
+      }
+      return (current + direction + matches.length) % matches.length;
+    });
+  }
+
+  function handleSearchKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      moveMatch(event.shiftKey ? -1 : 1);
+    }
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeSearch();
+    }
+  }
 
   return (
     <section className="workspace-grid">
@@ -59,11 +180,36 @@ export function WorkspaceSection({
           </button>
         </div>
         <textarea
-          className="code-editor"
+          ref={editorRef}
+          className={isSearchOpen ? "code-editor with-search" : "code-editor"}
           spellCheck={false}
           value={jsxCode}
           onChange={(event) => onJsxChange(event.target.value)}
         />
+        {isSearchOpen ? (
+          <div className="code-search-bar">
+            <Search size={16} />
+            <input
+              ref={searchInputRef}
+              value={searchTerm}
+              placeholder="코드 검색"
+              onChange={(event) => setSearchTerm(event.target.value)}
+              onKeyDown={handleSearchKeyDown}
+            />
+            <span className={matches.length ? "search-count" : "search-count empty"}>
+              {searchTerm.trim() ? `${activeMatchIndex + 1 > 0 ? activeMatchIndex + 1 : 0}/${matches.length}` : "0/0"}
+            </span>
+            <button className="icon-button" type="button" title="이전 결과" aria-label="이전 결과" onClick={() => moveMatch(-1)}>
+              <ChevronUp size={16} />
+            </button>
+            <button className="icon-button" type="button" title="다음 결과" aria-label="다음 결과" onClick={() => moveMatch(1)}>
+              <ChevronDown size={16} />
+            </button>
+            <button className="icon-button" type="button" title="검색 닫기" aria-label="검색 닫기" onClick={closeSearch}>
+              <X size={16} />
+            </button>
+          </div>
+        ) : null}
       </div>
 
       <aside className="side-pane">

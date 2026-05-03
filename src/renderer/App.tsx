@@ -32,21 +32,51 @@ export function App() {
     refreshGallery();
   }, []);
 
-  async function refreshLoadouts() {
+  async function refreshLoadouts(successMessage?: string) {
     const result = await api.listLoadouts();
     if (result.ok) {
       setLoadouts(result.data);
+      if (successMessage) {
+        setMessage(successMessage);
+      }
     } else {
       setMessage(result.error);
     }
   }
 
-  async function refreshGallery() {
+  async function refreshGallery(successMessage?: string) {
     const result = await api.listExports();
     if (result.ok) {
       setGalleryFiles(result.data);
+      setSelectedFile((current) => {
+        if (!current) {
+          return null;
+        }
+        return result.data.find((file) => file.name === current.name) ?? null;
+      });
+      if (successMessage) {
+        setMessage(successMessage);
+      }
     } else {
       setMessage(result.error);
+    }
+  }
+
+  async function refreshLoadoutsFromFolder() {
+    setBusy(true);
+    try {
+      await refreshLoadouts("saves 폴더를 다시 읽었습니다.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function refreshGalleryFromFolder() {
+    setBusy(true);
+    try {
+      await refreshGallery("exports 폴더를 다시 읽었습니다.");
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -157,7 +187,7 @@ export function App() {
           message={message}
           onNameChange={setLoadoutName}
           onSave={saveLoadout}
-          onRefresh={refreshLoadouts}
+          onRefresh={refreshLoadoutsFromFolder}
           onLoad={loadLoadout}
         />
       ) : null}
@@ -168,7 +198,7 @@ export function App() {
           selectedFile={selectedFile}
           isBusy={isBusy}
           message={message}
-          onRefresh={refreshGallery}
+          onRefresh={refreshGalleryFromFolder}
           onSelect={setSelectedFile}
           onClosePreview={() => setSelectedFile(null)}
         />

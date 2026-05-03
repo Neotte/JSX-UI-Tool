@@ -97,6 +97,7 @@ function validateLoadout(value) {
 
 async function saveLoadout(_event, payload) {
   const dirs = getDataDirs();
+  await fs.mkdir(dirs.saves, { recursive: true });
   const name = validateFileName(payload.name);
   validateResolution(Number(payload.width), Number(payload.height));
 
@@ -135,6 +136,7 @@ async function saveLoadout(_event, payload) {
 
 async function listLoadouts() {
   const { saves } = getDataDirs();
+  await fs.mkdir(saves, { recursive: true });
   const entries = await fs.readdir(saves, { withFileTypes: true });
   const items = [];
 
@@ -163,6 +165,7 @@ async function listLoadouts() {
 
 async function readLoadout(_event, nameInput) {
   const { saves } = getDataDirs();
+  await fs.mkdir(saves, { recursive: true });
   const name = validateFileName(nameInput);
   const filePath = safePath(saves, `${name}.json`);
   const data = JSON.parse(await fs.readFile(filePath, "utf8"));
@@ -177,6 +180,7 @@ async function readLoadout(_event, nameInput) {
 
 async function listExports() {
   const { exports } = getDataDirs();
+  await fs.mkdir(exports, { recursive: true });
   const entries = await fs.readdir(exports, { withFileTypes: true });
   const items = [];
 
@@ -200,6 +204,7 @@ async function listExports() {
 
 async function openExportPreview(_event, nameInput) {
   const { exports } = getDataDirs();
+  await fs.mkdir(exports, { recursive: true });
   const name = validateFileName(nameInput);
   const filePath = safePath(exports, `${name}.png`);
   await shell.showItemInFolder(filePath);
@@ -229,6 +234,7 @@ async function loadRendererWindow(win, fileName) {
 
 async function exportPng(_event, payload) {
   const { exports } = getDataDirs();
+  await fs.mkdir(exports, { recursive: true });
   const name = validateFileName(payload.name);
   const width = Number(payload.width);
   const height = Number(payload.height);

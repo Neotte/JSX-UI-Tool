@@ -132,6 +132,7 @@ button:disabled {
 }
 
 .editor-pane {
+  position: relative;
   display: grid;
   grid-template-rows: auto 1fr;
   gap: 12px;
@@ -307,6 +308,51 @@ small,
   background: transparent;
   transform-origin: top left;
   will-change: transform;
+}
+
+.code-editor.with-search {
+  padding-top: 58px;
+}
+
+.code-search-bar {
+  position: absolute;
+  top: 74px;
+  right: 12px;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: auto minmax(120px, 1fr) auto auto auto auto;
+  gap: 6px;
+  align-items: center;
+  width: min(430px, calc(100% - 24px));
+  min-height: 42px;
+  padding: 4px 6px 4px 10px;
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(49, 42, 60, 0.18);
+  border-radius: 7px;
+  box-shadow: 0 12px 34px rgba(49, 42, 60, 0.22);
+}
+
+.code-search-bar input {
+  min-width: 0;
+  height: 32px;
+  padding: 0 8px;
+  color: var(--text-main);
+  background: transparent;
+  border: 0;
+  outline: 0;
+}
+
+.search-count {
+  min-width: 44px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.search-count.empty {
+  color: #8f2438;
 }
 
 .preview-error,
