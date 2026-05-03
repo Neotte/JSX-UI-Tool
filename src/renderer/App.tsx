@@ -99,6 +99,7 @@ export function App() {
 
     if (result.ok) {
       setWorkspace((current) => ({ ...current, currentLoadoutName: result.data.name }));
+      setExportName(result.data.name);
       setMessage("로드아웃을 저장했습니다.");
       await refreshLoadouts();
     } else {
@@ -119,6 +120,7 @@ export function App() {
         currentLoadoutName: result.data.name
       });
       setLoadoutName(result.data.name);
+      setExportName(result.data.name);
       setActiveTab("workspace");
       setMessage("로드아웃을 불러왔습니다.");
     } else {
